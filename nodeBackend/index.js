@@ -4,6 +4,10 @@ const app = express()
 //add json-parser for incoming POST requests
 app.use(express.json())
 
+//add morgan middleware for logging
+const morgan = require('morgan')
+app.use(morgan('tiny'))
+
 let notes = [
     {
         id: 1,
