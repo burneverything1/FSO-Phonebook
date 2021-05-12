@@ -1,6 +1,9 @@
 const express = require('express')
 const app = express()
 
+//add json-parser for incoming POST requests
+app.use(express.json())
+
 let notes = [
     {
         id: 1,
@@ -51,6 +54,56 @@ app.delete('/api/notes/:id', (request, response) => {
 
     response.status(204).end()
 })
+
+const generateId = () => {
+    //find the largest ID in current list
+    const maxId = notes.length > 0  //ternary operator
+        ? Math.max(...notes.map(n => n.id))
+        : 0
+        /*
+        create a new array with the ids of notes, then find max
+        use three dot spread syntax to transform into individual numbers
+        */
+    return maxId + 1
+}
+
+app.post('/api/notes', (request, response) => {
+    const body = request.body
+    /*
+    the json-parser takes the JSON data of a request, transforms it
+    into a JS object and attaches it to the .body property of the request
+    object before the route handler is called
+    */
+    
+    //check for content in request
+    if (!body.content) {
+        return response.status(400).json({
+            error: 'content missing'
+        })
+    }
+
+    const note = {
+        content: body.content,
+        important: body.important || false,     //if data in body has .important, evaluate. Else, default to false
+        date: new Date(),
+        id: generateId(),
+    }
+
+    notes = notes.concat(note)
+
+    response.json(note)
+})
+
+/*
+Middleware are functions for handling request and response objects
+Below is a middleware function to catch if no route handles the HTTP request
+*/
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint '})
+}
+
+app.use(unknownEndpoint)
 
 const PORT = 3001
 app.listen(PORT, () => {
