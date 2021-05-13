@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Note from './components/Note'
 import noteService from './services/notes'
 
@@ -11,29 +10,10 @@ const App = (props) => {
   useEffect(() => {
     noteService
       .getAll()
-      .then(response => {
-        setNotes(response.data)
+      .then(initialNotes => {
+        setNotes(initialNotes)
       })
   }, [])
-
-  const addNote = (event) => {
-    event.preventDefault()
-    const noteObject = {
-      content: newNote,
-      date: new Date().toISOString(),
-      important: Math.random() < 0.5
-    }
-
-    //send created note in POST request
-    noteService
-      .create(noteObject)
-      .then(response => {
-        /* the newnote returned by backend server is added to the list of notes
-        in the application state to trigger a browser re-render */
-        setNotes(notes.concat(response.data))
-        setNewNote('')
-      })
-  }
 
   const handleNoteChange = (event) => {
     setNewNote(event.target.value)
@@ -48,6 +28,25 @@ const App = (props) => {
   /* a ternary operator that changes notesToShow depending on whether showAll is T/F.
   Using notesToShow allows for conditional filtering of displayed note elements. */
 
+  const addNote = (event) => {
+    event.preventDefault()
+    const noteObject = {
+      content: newNote,
+      date: new Date().toISOString(),
+      important: Math.random() < 0.5
+    }
+
+    //send created note in POST request
+    noteService
+      .create(noteObject)
+      .then(returnedNote => {
+        /* the newnote returned by backend server is added to the list of notes
+        in the application state to trigger a browser re-render */
+        setNotes(notes.concat(returnedNote))
+        setNewNote('')
+      })
+  }
+
   const toggleImportanceOf = (id) => {
     const note = notes.find(n => n.id === id)
     const changedNote = { ...note, important: !note.important}
@@ -57,8 +56,8 @@ const App = (props) => {
 
     noteService
       .update(id, changedNote)
-      .then(response => {
-        setNotes(notes.map(note => note.id !== id ? note : response.data))
+      .then(returnedNote => {
+        setNotes(notes.map(note => note.id !== id ? note : returnedNote))
         //replace Notes with a new array that is the same except for the changed note
       })
   }
