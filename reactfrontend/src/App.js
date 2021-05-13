@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Note from './components/Note'
+import noteService from './services/notes'
 
 const App = (props) => {
   const [notes, setNotes] = useState([])
@@ -8,8 +9,8 @@ const App = (props) => {
   const [showAll, setShowAll] = useState(true)
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/notes')
+    noteService
+      .getAll()
       .then(response => {
         setNotes(response.data)
       })
@@ -24,8 +25,8 @@ const App = (props) => {
     }
 
     //send created note in POST request
-    axios
-      .post('http://localhost:3001/notes', noteObject)
+    noteService
+      .create(noteObject)
       .then(response => {
         /* the newnote returned by backend server is added to the list of notes
         in the application state to trigger a browser re-render */
@@ -48,15 +49,14 @@ const App = (props) => {
   Using notesToShow allows for conditional filtering of displayed note elements. */
 
   const toggleImportanceOf = (id) => {
-    const url = `http://localhost:3001/notes/${id}`
     const note = notes.find(n => n.id === id)
     const changedNote = { ...note, important: !note.important}
     /* Create a new note that is a copy of the old note except for the important
     property. We create a new note instead of mutating the note directly as that
     would be mutating state directly */
 
-    axios
-      .put(url, changedNote)
+    noteService
+      .update(id, changedNote)
       .then(response => {
         setNotes(notes.map(note => note.id !== id ? note : response.data))
         //replace Notes with a new array that is the same except for the changed note
