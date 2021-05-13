@@ -60,9 +60,11 @@ const App = (props) => {
         setNotes(notes.map(note => note.id !== id ? note : returnedNote))
         //replace Notes with a new array that is the same except for the changed note
       })
+      .catch(error => {
+        alert(`the note '${note.content}' was already deleted from server`)
+        setNotes(notes.filter(n => n.id !== id))
+      })
   }
-  /* an event handler function passed to the Note component to allow buttons to
-  toggle note importance attribute */
 
   return (
     <div>
