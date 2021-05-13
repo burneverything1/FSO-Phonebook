@@ -4,6 +4,10 @@ const app = express()
 //add json-parser for incoming POST requests
 app.use(express.json())
 
+//add cors to allow for requests from all origins
+const cors = require('cors')
+app.use(cors())
+
 //add morgan middleware for logging
 const morgan = require('morgan')
 app.use(morgan('tiny'))
